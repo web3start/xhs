@@ -10,6 +10,8 @@
 - ✅ 失败重试机制
 - ✅ 详细日志输出
 - ✅ 灵活的配置选项
+- ✅ 签名故障诊断
+- ✅ 自动异常处理
 
 **使用方法：**
 
@@ -28,6 +30,30 @@ python monitor_user_notes.py --once
 # 5. 使用自定义配置文件
 python monitor_user_notes.py --config my_config.json
 ```
+
+**📖 相关文档：**
+- [快速开始指南](MONITOR_QUICK_START.md) - 新手必读
+- [故障排查指南](MONITOR_TROUBLESHOOTING.md) - 遇到问题看这里
+
+---
+
+### 1.5. `test_sign.py` - 签名诊断工具（新）
+
+**专门用于诊断签名问题的工具**，包含：
+- ✅ 自动检测 Playwright 安装状态
+- ✅ 测试浏览器启动
+- ✅ 测试页面加载
+- ✅ 测试签名函数
+- ✅ 详细的错误提示和解决方案
+
+**使用方法：**
+
+```bash
+# 如果 monitor_user_notes.py 卡住不动，先运行这个
+python test_sign.py
+```
+
+这个工具会帮你快速定位问题所在。
 
 ---
 
@@ -165,6 +191,28 @@ downloaded_notes.json          # 已下载记录（快速示例）
 
 ## ❓ 常见问题
 
+### Q: 程序卡住不动，一直显示"正在获取用户笔记列表..."？
+
+**这是最常见的问题！**
+
+**快速解决：**
+```bash
+# 1. 先运行诊断工具
+python test_sign.py
+
+# 2. 根据诊断结果修复
+# 3. 查看详细指南
+cat MONITOR_TROUBLESHOOTING.md
+```
+
+**可能原因：**
+- Playwright 或 Chromium 未正确安装
+- 网络连接问题
+- 签名函数加载失败
+- Cookie 过期
+
+详细的解决方案请查看 **[故障排查指南](MONITOR_TROUBLESHOOTING.md)**
+
 ### Q: 签名失败怎么办？
 
 ```
@@ -172,15 +220,16 @@ downloaded_notes.json          # 已下载记录（快速示例）
 ```
 
 **解决方法：**
-1. 确保已安装playwright: `playwright install chromium`
-2. 尝试设置 `use_headless: false` 查看浏览器
-3. 增加重试次数和延迟时间
-4. 检查网络连接
+1. 运行 `python test_sign.py` 诊断
+2. 确保已安装playwright: `playwright install chromium`
+3. 尝试设置 `use_headless: false` 查看浏览器
+4. 增加重试次数和延迟时间
+5. 检查网络连接
 
 ### Q: Cookie失效了？
 
 **解决方法：**
-重新从浏览器获取cookie并更新配置
+重新从浏览器获取cookie并更新配置（Cookie 通常 1-7 天过期）
 
 ### Q: 如何监控多个用户？
 

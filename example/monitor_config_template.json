@@ -1,0 +1,31 @@
+{
+    "_comment_1": "小红书笔记监控配置文件",
+    "_comment_2": "首次使用请复制此文件为 monitor_config.json 并填写实际值",
+    
+    "cookie": "your_cookie_here",
+    "_cookie_help": "从浏览器获取的完整cookie字符串。获取方法见README_MONITOR.md",
+    
+    "user_id": "target_user_id_here",
+    "_user_id_help": "要监控的小红书用户ID，从用户主页URL中获取",
+    
+    "download_dir": "./downloads",
+    "_download_dir_help": "笔记下载保存的目录路径",
+    
+    "check_interval": 300,
+    "_check_interval_help": "检查新笔记的间隔时间（秒），建议不少于300秒（5分钟）",
+    
+    "stealth_js_path": "./stealth.min.js",
+    "_stealth_js_help": "stealth.js文件路径，用于防检测。如果文件不存在会自动跳过",
+    
+    "use_headless": true,
+    "_use_headless_help": "是否使用无头浏览器。如果签名经常失败，可设置为false查看浏览器状态",
+    
+    "max_retries": 3,
+    "_max_retries_help": "请求失败时的最大重试次数",
+    
+    "retry_delay": 2,
+    "_retry_delay_help": "重试之间的延迟时间（秒）",
+    
+    "downloaded_notes_file": "downloaded_notes.json",
+    "_downloaded_notes_file_help": "记录已下载笔记ID的文件路径"
+}

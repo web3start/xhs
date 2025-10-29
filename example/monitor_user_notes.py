@@ -77,50 +77,87 @@ class NoteMonitor:
         如果签名经常失败，可以设置 use_headless=False 查看浏览器状态
         """
         for retry in range(self.config.get("max_retries", 3)):
+            browser = None
             try:
+                print(f"   🔐 正在生成签名 (URI: {uri[:50]}...)")
                 with sync_playwright() as playwright:
                     stealth_js_path = self.config.get("stealth_js_path", "./stealth.min.js")
                     chromium = playwright.chromium
                     
                     # 可配置是否使用无头模式
                     use_headless = self.config.get("use_headless", True)
+                    print(f"   🌐 启动浏览器 (headless={use_headless})...")
                     browser = chromium.launch(headless=use_headless)
                     
                     browser_context = browser.new_context()
                     
                     # 如果stealth.js文件存在，则添加
                     if os.path.exists(stealth_js_path):
+                        print(f"   📄 加载 stealth.js")
                         browser_context.add_init_script(path=stealth_js_path)
+                    else:
+                        print(f"   ⚠️  stealth.js 文件不存在: {stealth_js_path}")
                     
                     context_page = browser_context.new_page()
-                    context_page.goto("https://www.xiaohongshu.com")
+                    print(f"   📡 加载小红书页面...")
+                    
+                    # 设置页面加载超时
+                    context_page.set_default_timeout(30000)  # 30秒超时
+                    context_page.goto("https://www.xiaohongshu.com", wait_until="domcontentloaded")
                     
                     if a1:
+                        print(f"   🍪 设置 cookie (a1)")
                         browser_context.add_cookies([
                             {'name': 'a1', 'value': a1, 'domain': ".xiaohongshu.com", 'path': "/"}
                         ])
-                        context_page.reload()
+                        context_page.reload(wait_until="domcontentloaded")
                     
                     # 等待页面加载
-                    sleep(1)
+                    print(f"   ⏳ 等待页面加载完成...")
+                    sleep(2)
                     
+                    # 检查签名函数是否存在
+                    print(f"   🔍 检查签名函数是否存在...")
+                    has_sign_func = context_page.evaluate("() => typeof window._webmsxyw === 'function'")
+                    if not has_sign_func:
+                        raise Exception("window._webmsxyw 签名函数不存在，页面可能未完全加载")
+                    
+                    print(f"   ✨ 执行签名函数...")
                     encrypt_params = context_page.evaluate(
                         "([url, data]) => window._webmsxyw(url, data)", 
                         [uri, data]
                     )
                     
-                    browser.close()
+                    if not encrypt_params or "X-s" not in encrypt_params:
+                        raise Exception("签名函数返回结果无效")
                     
-                    return {
+                    print(f"   ✅ 签名生成成功")
+                    
+                    result = {
                         "x-s": encrypt_params["X-s"],
                         "x-t": str(encrypt_params["X-t"])
                     }
+                    
+                    browser.close()
+                    return result
+                    
             except Exception as e:
+                # 确保浏览器被关闭
+                if browser:
+                    try:
+                        browser.close()
+                    except:
+                        pass
+                
                 print(f"⚠️  签名失败 (重试 {retry + 1}/{self.config.get('max_retries', 3)}): {e}")
                 if retry < self.config.get("max_retries", 3) - 1:
+                    print(f"   💤 等待 {self.config.get('retry_delay', 2)} 秒后重试...")
                     sleep(self.config.get("retry_delay", 2))
         
-        raise Exception("❌ 签名失败次数过多，请检查配置")
+        raise Exception("❌ 签名失败次数过多，请检查配置。建议:\n"
+                       "   1. 运行 'python test_sign.py' 进行诊断\n"
+                       "   2. 检查网络连接\n"
+                       "   3. 查看 MONITOR_TROUBLESHOOTING.md 获取详细帮助")
     
     def init_client(self):
         """初始化小红书客户端"""

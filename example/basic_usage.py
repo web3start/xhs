@@ -15,7 +15,15 @@ def sign(uri, data=None, a1="", web_session=""):
                 chromium = playwright.chromium
 
                 # 如果一直失败可尝试设置成 False 让其打开浏览器，适当添加 sleep 可查看浏览器状态
-                browser = chromium.launch(headless=True)
+                # 添加启动参数以避免在某些环境（如 ARM 架构）中挂起
+                browser = chromium.launch(
+                    headless=True,
+                    args=[
+                        '--disable-blink-features=AutomationControlled',
+                        '--disable-dev-shm-usage',
+                        '--no-sandbox'
+                    ]
+                )
 
                 browser_context = browser.new_context()
                 browser_context.add_init_script(path=stealth_js_path)

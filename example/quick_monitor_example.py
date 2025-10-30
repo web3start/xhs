@@ -19,7 +19,15 @@ from xhs import XhsClient, help
 def sign(uri, data=None, a1="", web_session=""):
     """签名函数 - 使用playwright生成请求签名"""
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
+        # 添加启动参数以避免在某些环境（如 ARM 架构）中挂起
+        browser = playwright.chromium.launch(
+            headless=True,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--disable-dev-shm-usage',
+                '--no-sandbox'
+            ]
+        )
         context = browser.new_context()
         page = context.new_page()
         page.goto("https://www.xiaohongshu.com")

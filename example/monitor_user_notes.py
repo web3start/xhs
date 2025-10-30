@@ -87,7 +87,15 @@ class NoteMonitor:
                     # 可配置是否使用无头模式
                     use_headless = self.config.get("use_headless", True)
                     print(f"   🌐 启动浏览器 (headless={use_headless})...")
-                    browser = chromium.launch(headless=use_headless)
+                    # 添加启动参数以避免在某些环境（如 ARM 架构）中挂起
+                    browser = chromium.launch(
+                        headless=use_headless,
+                        args=[
+                            '--disable-blink-features=AutomationControlled',
+                            '--disable-dev-shm-usage',
+                            '--no-sandbox'
+                        ]
+                    )
                     
                     browser_context = browser.new_context()
                     

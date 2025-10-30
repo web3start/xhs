@@ -13,7 +13,15 @@ A1 = ""
 
 def get_context_page(instance, stealth_js_path):
     chromium = instance.chromium
-    browser = chromium.launch(headless=True)
+    # 添加启动参数以避免在某些环境（如 ARM 架构）中挂起
+    browser = chromium.launch(
+        headless=True,
+        args=[
+            '--disable-blink-features=AutomationControlled',
+            '--disable-dev-shm-usage',
+            '--no-sandbox'
+        ]
+    )
     context = browser.new_context()
     context.add_init_script(path=stealth_js_path)
     page = context.new_page()

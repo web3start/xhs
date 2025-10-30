@@ -25,7 +25,15 @@ def test_sign_basic():
             
             print("🌐 启动 Chromium 浏览器...")
             chromium = playwright.chromium
-            browser = chromium.launch(headless=True)
+            # 添加启动参数以避免在某些环境（如 ARM 架构）中挂起
+            browser = chromium.launch(
+                headless=True,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox'
+                ]
+            )
             print("✅ 浏览器启动成功")
             
             print("📄 创建浏览器上下文...")
@@ -144,7 +152,14 @@ def test_sign_with_cookie():
         print("📱 启动 Playwright...")
         with sync_playwright() as playwright:
             chromium = playwright.chromium
-            browser = chromium.launch(headless=True)
+            browser = chromium.launch(
+                headless=True,
+                args=[
+                    '--disable-blink-features=AutomationControlled',
+                    '--disable-dev-shm-usage',
+                    '--no-sandbox'
+                ]
+            )
             browser_context = browser.new_context()
             context_page = browser_context.new_page()
             context_page.set_default_timeout(30000)
